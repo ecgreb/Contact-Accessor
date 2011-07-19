@@ -28,16 +28,12 @@ public class ContactList extends ArrayList<ContactList.Contact> {
     private void importContacts() {
         Log.v(TAG, "Importing contacts...");
         Cursor c = mApi.queryContacts();
-        String id, displayName, hasPhone;
+        String id, displayName;
         if (c.getCount() > 0) {
             while (c.moveToNext()) {
-                id = c.getString(c.getColumnIndex(mApi.getColumnId()));
-                displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
-                hasPhone = c.getString(c.getColumnIndex(mApi.getColumnHasPhoneIndicator()));
-
-                Log.v(TAG, "id=" + id + ", name=" + displayName + ", hasPhone=" + hasPhone);
-
-                if (isContactValid(displayName, hasPhone)) {
+                if (isValidContact(c)) {
+                    id = c.getString(c.getColumnIndex(mApi.getColumnId()));
+                    displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
                     add(new Contact(id, displayName));
                 }
             }
@@ -45,12 +41,16 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         c.close();
     }
 
-    private boolean isContactValid(String displayName, String hasPhoneIndicator) {
+    private boolean isValidContact(Cursor c) {
+        String displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
         if (TextUtils.isEmpty(displayName)) {
             return false;
-        } else if (TextUtils.isEmpty(hasPhoneIndicator)) {
+        }
+
+        String hasPhone = c.getString(c.getColumnIndex(mApi.getColumnHasPhoneIndicator()));
+        if (TextUtils.isEmpty(hasPhone)) {
             return false;
-        } else if (Integer.parseInt(hasPhoneIndicator) == 0) {
+        } else if (Integer.parseInt(hasPhone) == 0) {
             return false;
         }
 
