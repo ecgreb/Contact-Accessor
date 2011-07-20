@@ -1,7 +1,6 @@
 package com.example;
 
 import android.database.Cursor;
-import android.test.mock.MockCursor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
