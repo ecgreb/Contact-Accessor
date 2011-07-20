@@ -114,7 +114,7 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         @Override
         public String toString() {
             return "Contact{" +
-                    "id='" + mDisplayName + '\'' +
+                    "id='" + mId + '\'' +
                     ", displayName='" + mDisplayName + '\'' +
                     '}';
         }
