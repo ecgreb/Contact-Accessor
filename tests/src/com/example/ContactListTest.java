@@ -112,6 +112,59 @@ public class ContactListTest extends TestCase {
         assertEquals("email0@test.com", emailList.get(0));
     }
 
+    public void testCanGetEmailAddressForTwoContacts() {
+        generateSampleContacts(2);
+        ContactList contactList = new ContactList(mMockContactApi);
+        List<String> emailList0 = contactList.get(0).getEmailAddresses();
+        List<String> emailList1 = contactList.get(1).getEmailAddresses();
+        assertEquals("email0@test.com", emailList0.get(0));
+        assertEquals("email1@test.com", emailList1.get(0));
+    }
+
+    public void testGetContactWithMultipleEmailAddresses() {
+        String[] fakePhoneArray = { "0000000000" };
+        String[] fakeEmailArray = { "email@test01.com", "email@test02.com" };
+        mMockContactApi.addMockContact("0", "Display Name 0", fakePhoneArray, fakeEmailArray);
+        ContactList contactList = new ContactList(mMockContactApi);
+        List<String> emailList = contactList.get(0).getEmailAddresses();
+        assertEquals(2, emailList.size());
+        assertEquals("email@test01.com", emailList.get(0));
+        assertEquals("email@test02.com", emailList.get(1));
+    }
+
+    public void testContactWithNoPhoneAndNoEmailIsExcludedFromList() {
+        String[] fakePhoneArray0 = { "0000000000" };
+        String[] fakeEmailArray0 = { "email0@test.com" };
+        mMockContactApi.addMockContact("0", "Phone And Email", fakePhoneArray0, fakeEmailArray0);
+
+        String[] fakePhoneArray1 = { "1111111111" };
+        String[] fakeEmailArray1 = { };
+        mMockContactApi.addMockContact("1", "Phone Only", fakePhoneArray1, fakeEmailArray1);
+
+        String[] fakePhoneArray2 = { };
+        String[] fakeEmailArray2 = { "email2@test.com" };
+        mMockContactApi.addMockContact("2", "Email Only", fakePhoneArray2, fakeEmailArray2);
+
+        String[] fakePhoneArray3 = { };
+        String[] fakeEmailArray3 = { };
+        mMockContactApi.addMockContact("3", "Neither", fakePhoneArray3, fakeEmailArray3);
+
+        ContactList contactList = new ContactList(mMockContactApi);
+        assertEquals(3, contactList.size());
+        for (ContactList.Contact contact : contactList) {
+            assertNotSame("Neither", contact.getDisplayName());
+        }
+    }
+
+    public void testNonNumericCharactersAreStrippedFromPhoneNumber() {
+        String[] fakePhoneArray0 = { "123-456.78 90abc" };
+        String[] fakeEmailArray0 = { "email0@test.com" };
+        mMockContactApi.addMockContact("0", "Display Name 0", fakePhoneArray0, fakeEmailArray0);
+
+        ContactList contactList = new ContactList(mMockContactApi);
+        assertEquals("1234567890", contactList.get(0).getPhoneNumbers().get(0));
+    }
+
     /**
      * Convenience method to add sample contacts to {@link MockContactApi} with one phone number
      * and one email address.

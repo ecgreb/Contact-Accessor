@@ -31,9 +31,9 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         String id, displayName;
         if (c.getCount() > 0) {
             while (c.moveToNext()) {
-                if (isValidContact(c)) {
-                    id = c.getString(c.getColumnIndex(mApi.getColumnId()));
-                    displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
+                id = c.getString(c.getColumnIndex(mApi.getColumnId()));
+                displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
+                if (isValidContact(id, displayName)) {
                     add(new Contact(id, displayName));
                 }
             }
@@ -41,13 +41,20 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         c.close();
     }
 
-    private boolean isValidContact(Cursor c) {
-        String displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
+    private boolean isValidContact(String id, String displayName) {
         if (TextUtils.isEmpty(displayName)) {
             return false;
         }
 
-        return true;
+        Cursor phoneCursor = mApi.queryPhoneNumbers(id);
+        boolean hasPhoneNumber = (phoneCursor.getCount() > 0);
+        phoneCursor.close();
+
+        Cursor emailCursor = mApi.queryEmailAddresses(id);
+        boolean hasEmailAddress = (emailCursor.getCount() > 0);
+        emailCursor.close();
+
+        return hasPhoneNumber || hasEmailAddress;
     }
 
     List<String> importPhoneNumbersById(String id) {
@@ -57,6 +64,7 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         if (c.getCount() > 0) {
             while (c.moveToNext()) {
                 phoneNumber = c.getString(c.getColumnIndex(mApi.getColumnPhoneNumber()));
+                phoneNumber = phoneNumber.replaceAll("[^\\d]", "");
                 if (!TextUtils.isEmpty(phoneNumber)) {
                     phoneList.add(phoneNumber);
                 }
@@ -106,9 +114,8 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         @Override
         public String toString() {
             return "Contact{" +
-                    "displayName='" + mDisplayName + '\'' +
-                    ", phoneList='" + getPhoneNumbers().toString() + '\'' +
-                    ", emailList='" + getEmailAddresses().toString() + '\'' +
+                    "id='" + mDisplayName + '\'' +
+                    ", displayName='" + mDisplayName + '\'' +
                     '}';
         }
     }
