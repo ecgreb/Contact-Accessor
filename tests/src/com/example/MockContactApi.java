@@ -2,7 +2,6 @@ package com.example;
 
 import android.database.Cursor;
 import android.test.mock.MockCursor;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,18 +15,14 @@ import java.util.HashMap;
  */
 public class MockContactApi extends ContactApi {
 
-    private static final String TAG = "MockContactApi";
-
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_DISPLAY_NAME = "displayName";
-    private static final String COLUMN_PHONE_INDICATOR = "phoneIndicator";
     private static final String COLUMN_NUMBER = "number";
-    private static final String COLUMN_EMAIL_INDICATOR = "emailIndicator";
     private static final String COLUMN_EMAIL = "email";
 
     private MockContactCursor mContactCursor = new MockContactCursor();
-    private HashMap<String, MockPhoneCursor> mPhoneCursorMap =
-            new HashMap<String, MockPhoneCursor>();
+    private HashMap<String, MockDataCursor> mPhoneCursors = new HashMap<String, MockDataCursor>();
+    private HashMap<String, MockDataCursor> mEmailCursors = new HashMap<String, MockDataCursor>();
 
     public MockContactApi() {
         super();
@@ -44,18 +39,8 @@ public class MockContactApi extends ContactApi {
     }
 
     @Override
-    public String getColumnHasPhoneIndicator() {
-        return COLUMN_PHONE_INDICATOR;
-    }
-
-    @Override
     public String getColumnPhoneNumber() {
         return COLUMN_NUMBER;
-    }
-
-    @Override
-    public String getColumnEmailIndicator() {
-        return COLUMN_EMAIL_INDICATOR;
     }
 
     @Override
@@ -68,7 +53,6 @@ public class MockContactApi extends ContactApi {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
         }
-
         return mContactCursor;
     }
 
@@ -77,53 +61,50 @@ public class MockContactApi extends ContactApi {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
         }
-
-        return mPhoneCursorMap.get(contactId);
+        return mPhoneCursors.get(contactId);
     }
 
     @Override
     public Cursor queryEmailAddresses(String contactId) {
-        return null;
+        if (mResolver == null) {
+            throw new IllegalStateException("Content resolver has not been initialized");
+        }
+        return mEmailCursors.get(contactId);
     }
 
-    public void addMockContact(String id, String name, String[] phoneArray) {
-        Log.v(TAG, "addContact: " + name);
-        if (phoneArray.length == 0) {
-            mContactCursor.addValues(id, name, false);
-        } else {
-            mContactCursor.addValues(id, name, true);
-            MockPhoneCursor mockPhoneCursor = new MockPhoneCursor();
-            for (String number : phoneArray) {
-                mockPhoneCursor.addValue(number);
-            }
-            mPhoneCursorMap.put(id, mockPhoneCursor);
+    public void addMockContact(String id, String name, String[] phoneArray, String[] emailArray) {
+        mContactCursor.addValues(id, name);
+
+        MockDataCursor mockPhoneCursor = new MockDataCursor();
+        for (String number : phoneArray) {
+            mockPhoneCursor.addValue(number);
         }
+        mPhoneCursors.put(id, mockPhoneCursor);
+
+        MockDataCursor mockEmailCursor = new MockDataCursor();
+        for (String email : emailArray) {
+            mockEmailCursor.addValue(email);
+        }
+        mEmailCursors.put(id, mockEmailCursor);
     }
 
     public class MockContactCursor extends MockCursor {
 
-        private static final String TAG = "MockContactCursor";
-
         private int mPosition = -1;
         private ArrayList<String> mIdArray = new ArrayList<String>();
         private ArrayList<String> mDisplayNameArray = new ArrayList<String>();
-        private ArrayList<Boolean> mHasPhoneNumberArray = new ArrayList<Boolean>();
 
         public MockContactCursor() {
             super();
-            Log.v(TAG, "MockContactCursor");
         }
 
-        public void addValues(String id, String displayName, boolean hasPhoneNumber) {
-            Log.v(TAG, "addValues: " + id + " " + displayName);
+        public void addValues(String id, String displayName) {
             mIdArray.add(id);
             mDisplayNameArray.add(displayName);
-            mHasPhoneNumberArray.add(hasPhoneNumber);
         }
 
         @Override
         public int getCount() {
-            Log.v(TAG, "getCount: " + mDisplayNameArray.size());
             return mDisplayNameArray.size();
         }
 
@@ -145,8 +126,6 @@ public class MockContactApi extends ContactApi {
                 return 0;
             } else if (COLUMN_DISPLAY_NAME.equals(column)) {
                 return 1;
-            } else if (COLUMN_PHONE_INDICATOR.equals(column)) {
-                return 2;
             }
 
             return -1;
@@ -158,8 +137,6 @@ public class MockContactApi extends ContactApi {
                 return mIdArray.get(mPosition);
             } else if (index == 1) {
                 return mDisplayNameArray.get(mPosition);
-            } else if (index == 2) {
-                return mHasPhoneNumberArray.get(mPosition) ? "1" : "0";
             }
 
             return null;
@@ -171,26 +148,17 @@ public class MockContactApi extends ContactApi {
         }
     }
 
-    public class MockPhoneCursor extends MockCursor {
-
-        private static final String TAG = "MockPhoneCursor";
+    public class MockDataCursor extends MockCursor {
 
         private int mPosition = -1;
         private ArrayList<String> mValues = new ArrayList<String>();
 
-        public MockPhoneCursor() {
-            super();
-            Log.v(TAG, "MockPhoneCursor");
-        }
-
         public void addValue(String value) {
-            Log.v(TAG, "addValue: " + value);
             mValues.add(value);
         }
 
         @Override
         public int getCount() {
-            Log.v(TAG, "getCount: " + mValues.size());
             return mValues.size();
         }
 

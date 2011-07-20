@@ -92,27 +92,11 @@ public abstract class ContactApi {
     public abstract String getColumnDisplayName();
 
     /**
-     * Ge the database HAS_PHONE_NUMBER (SDK 5) or PRIMARY_PHONE (SDK 3) column. Used to determine
-     * if a contact has at least one phone number associated with it.
-     *
-     * @return Cursor column name used to determine if contact has at least one phone number.
-     */
-    public abstract String getColumnHasPhoneIndicator();
-
-    /**
      * Get the database phone number column.
      *
      * @return Cursor column name used to retrieve the phone number(s).
      */
     public abstract String getColumnPhoneNumber();
-
-    /**
-     * Get the database primary email or has email indicator column. Used to determine if a contact
-     * has at least one phone number associated with it.
-     *
-     * @return Cursor column name used to determine if contact has at least one email address.
-     */
-    public abstract String getColumnEmailIndicator();
 
     /**
      * Get the database email address column.

@@ -65,4 +65,19 @@ public class ContactApiTest extends TestCase {
         assertEquals("Content resolver has not been initialized", message);
     }
 
+    public void testEmailQueryBeforeInitializingContentResolverThrowsIllegalStateException() {
+        Class type = null;
+        String message = null;
+
+        try {
+            mContactApi.queryEmailAddresses("");
+        } catch (IllegalStateException e) {
+            type = e.getClass();
+            message = e.getMessage();
+        }
+
+        assertEquals(IllegalStateException.class, type);
+        assertEquals("Content resolver has not been initialized", message);
+    }
+
 }

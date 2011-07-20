@@ -47,13 +47,6 @@ public class ContactList extends ArrayList<ContactList.Contact> {
             return false;
         }
 
-        String hasPhone = c.getString(c.getColumnIndex(mApi.getColumnHasPhoneIndicator()));
-        if (TextUtils.isEmpty(hasPhone)) {
-            return false;
-        } else if (Integer.parseInt(hasPhone) == 0) {
-            return false;
-        }
-
         return true;
     }
 
@@ -73,6 +66,22 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         return phoneList;
     }
 
+    List<String> importEmailAddressesById(String id) {
+        Cursor c = mApi.queryEmailAddresses(id);
+        ArrayList<String> emailList = new ArrayList<String>();
+        String emailAddress;
+        if (c.getCount() > 0) {
+            while (c.moveToNext()) {
+                emailAddress = c.getString(c.getColumnIndex(mApi.getColumnEmailAddress()));
+                if (!TextUtils.isEmpty(emailAddress)) {
+                    emailList.add(emailAddress);
+                }
+            }
+        }
+        c.close();
+        return emailList;
+    }
+
     public class Contact {
         private String mId;
         private String mDisplayName;
@@ -90,11 +99,16 @@ public class ContactList extends ArrayList<ContactList.Contact> {
             return importPhoneNumbersById(mId);
         }
 
+        public List<String> getEmailAddresses() {
+            return importEmailAddressesById(mId);
+        }
+
         @Override
         public String toString() {
             return "Contact{" +
                     "displayName='" + mDisplayName + '\'' +
                     ", phoneList='" + getPhoneNumbers().toString() + '\'' +
+                    ", emailList='" + getEmailAddresses().toString() + '\'' +
                     '}';
         }
     }
