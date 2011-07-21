@@ -43,7 +43,10 @@ public class ContactApiSdk5 extends ContactApi {
         }
 
         final Uri uri = ContactsContract.Contacts.CONTENT_URI;
-        return mResolver.query(uri, null, null, null, null);
+        final String[] projection = new String[] {
+                ContactsContract.Contacts._ID,
+                ContactsContract.Contacts.DISPLAY_NAME };
+        return mResolver.query(uri, projection, null, null, null);
     }
 
     @Override
@@ -53,8 +56,9 @@ public class ContactApiSdk5 extends ContactApi {
         }
 
         final Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+        final String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER };
         final String query = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?";
-        return mResolver.query(uri, null, query, new String[] { contactId }, null);
+        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
     }
 
     @Override
@@ -64,8 +68,9 @@ public class ContactApiSdk5 extends ContactApi {
         }
 
         final Uri uri = ContactsContract.CommonDataKinds.Email.CONTENT_URI;
+        final String[] projection = new String[] { ContactsContract.CommonDataKinds.Email.DATA };
         final String query = ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?";
-        return mResolver.query(uri, null, query, new String[] { contactId }, null);
+        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
     }
 
     @Override
@@ -78,7 +83,7 @@ public class ContactApiSdk5 extends ContactApi {
         final String[] projection = new String[] {
                 ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
                 ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME };
-        final String query = ContactsContract.Data.CONTACT_ID +" = ? AND " +
+        final String query = ContactsContract.Data.CONTACT_ID + " = ? AND " +
                 ContactsContract.Data.MIMETYPE + "='" +
                 ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE + "'";
 

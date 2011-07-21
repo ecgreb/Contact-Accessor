@@ -44,7 +44,9 @@ public class ContactApiSdk3 extends ContactApi {
         }
 
         final Uri uri = Contacts.People.CONTENT_URI;
-        return mResolver.query(uri, null, null, null, null);
+        final String[] projection =
+                new String[] { Contacts.People._ID, Contacts.People.DISPLAY_NAME };
+        return mResolver.query(uri, projection, null, null, null);
     }
 
     @Override
@@ -54,8 +56,9 @@ public class ContactApiSdk3 extends ContactApi {
         }
 
         final Uri uri = Contacts.Phones.CONTENT_URI;
+        final String[] projection = new String[] { Contacts.Phones.NUMBER };
         final String query = Contacts.Phones.PERSON_ID + " = ?";
-        return mResolver.query(uri, null, query, new String[] { contactId }, null);
+        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
     }
 
     @Override
@@ -65,8 +68,9 @@ public class ContactApiSdk3 extends ContactApi {
         }
 
         final Uri uri = Contacts.ContactMethods.CONTENT_EMAIL_URI;
+        final String[] projection = new String[] { Contacts.ContactMethods.DATA };
         final String query = Contacts.ContactMethods.PERSON_ID + " = ?";
-        return mResolver.query(uri, null, query, new String[] { contactId }, null);
+        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
     }
 
     @Override
