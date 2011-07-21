@@ -3,6 +3,7 @@ package com.example;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Debug;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ public class MyActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
 
+        Debug.startMethodTracing("contactapi");
         long startTime = System.currentTimeMillis();
 
         ContactApi contactApi = ContactApi.getInstance();
@@ -45,6 +47,7 @@ public class MyActivity extends ListActivity {
         setListAdapter(new ContactArrayAdapter(this, R.layout.list_item, contactList));
 
         long uiTime = System.currentTimeMillis();
+        Debug.stopMethodTracing();
 
         Log.v(TAG, "---------------------- Benchmarks -----------------------");
         Log.v(TAG, "Generate List: " + (endTime - startTime));
