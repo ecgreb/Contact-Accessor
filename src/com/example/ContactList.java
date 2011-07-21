@@ -2,6 +2,7 @@ package com.example;
 
 import android.database.Cursor;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class ContactList extends ArrayList<ContactList.Contact> {
     private void importContacts() {
         Cursor c = mApi.queryContacts();
         String id, displayName;
+        Log.v("ContactList", "Contacts Base Count (pre-filter) = " + c.getCount());
         if (c.getCount() > 0) {
             while (c.moveToNext()) {
                 id = c.getString(c.getColumnIndex(mApi.getColumnId()));

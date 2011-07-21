@@ -22,6 +22,8 @@ public class MyActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
 
+        long startTime = System.currentTimeMillis();
+
         ContactApi contactApi = ContactApi.getInstance();
         contactApi.initContentResolver(getContentResolver());
 
@@ -29,12 +31,26 @@ public class MyActivity extends ListActivity {
 
         ContactList contactList = new ContactList(contactApi);
 
+        Log.v(TAG, "Contact List Size (post-filter) = " + contactList.size());
+
+        long endTime = System.currentTimeMillis();
+
         Log.v(TAG, "---------------------- Contacts -----------------------");
         for (ContactList.Contact contact : contactList) {
             Log.v(TAG, contact.toString());
         }
 
+        long logTime = System.currentTimeMillis();
+
         setListAdapter(new ContactArrayAdapter(this, R.layout.list_item, contactList));
+
+        long uiTime = System.currentTimeMillis();
+
+        Log.v(TAG, "---------------------- Benchmarks -----------------------");
+        Log.v(TAG, "Generate List: " + (endTime - startTime));
+        Log.v(TAG, "Log Details: " + (logTime - endTime));
+        Log.v(TAG, "Populate UI: " + (uiTime - logTime));
+
 
     }
 
