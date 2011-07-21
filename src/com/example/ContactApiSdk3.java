@@ -18,6 +18,11 @@ public class ContactApiSdk3 extends ContactApi {
     }
 
     @Override
+    public String getColumnPhoneIndicator() {
+        return Contacts.People.PRIMARY_PHONE_ID;
+    }
+
+    @Override
     public String getColumnPhoneNumber() {
         return Contacts.Phones.NUMBER;
     }
@@ -44,8 +49,10 @@ public class ContactApiSdk3 extends ContactApi {
         }
 
         final Uri uri = Contacts.People.CONTENT_URI;
-        final String[] projection =
-                new String[] { Contacts.People._ID, Contacts.People.DISPLAY_NAME };
+        final String[] projection = new String[] {
+                Contacts.People._ID,
+                Contacts.People.DISPLAY_NAME,
+                Contacts.People.PRIMARY_PHONE_ID };
         return mResolver.query(uri, projection, null, null, null);
     }
 

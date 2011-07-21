@@ -92,6 +92,13 @@ public abstract class ContactApi {
     public abstract String getColumnDisplayName();
 
     /**
+     * Get phone indicator column
+     *
+     * @return Cursor column used to determine if contact has at least one phone number
+     */
+    public abstract String getColumnPhoneIndicator();
+
+    /**
      * Get the database phone number column.
      *
      * @return Cursor column name used to retrieve the phone number(s).

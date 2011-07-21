@@ -16,6 +16,7 @@ public class MockContactApi extends ContactApi {
 
     private static final String COLUMN_ID = "_id";
     private static final String COLUMN_DISPLAY_NAME = "displayName";
+    private static final String COLUMN_PHONE_INDICATOR = "phoneIndicator";
     private static final String COLUMN_NUMBER = "number";
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_GIVEN_NAME = "givenName";
@@ -38,6 +39,11 @@ public class MockContactApi extends ContactApi {
     @Override
     public String getColumnDisplayName() {
         return COLUMN_DISPLAY_NAME;
+    }
+
+    @Override
+    public String getColumnPhoneIndicator() {
+        return COLUMN_PHONE_INDICATOR;
     }
 
     @Override
@@ -92,8 +98,10 @@ public class MockContactApi extends ContactApi {
         return mNameCursors.get(contactId);
     }
 
-    public void addMockContact(String id, String name, String[] phoneArray, String[] emailArray) {
-        mContactCursor.addValues(id, name);
+    public void addMockContact(String id, String name, String hasPhone, String[] phoneArray,
+            String[] emailArray) {
+
+        mContactCursor.addValues(id, name, hasPhone);
 
         MockDataCursor mockPhoneCursor = new MockDataCursor();
         for (String number : phoneArray) {
@@ -117,10 +125,12 @@ public class MockContactApi extends ContactApi {
         private int mPosition = -1;
         private ArrayList<String> mIdArray = new ArrayList<String>();
         private ArrayList<String> mDisplayNameArray = new ArrayList<String>();
+        private ArrayList<String> mHasPhoneArray = new ArrayList<String>();
 
-        public void addValues(String id, String displayName) {
+        public void addValues(String id, String displayName, String hasPhone) {
             mIdArray.add(id);
             mDisplayNameArray.add(displayName);
+            mHasPhoneArray.add(hasPhone);
         }
 
         @Override
@@ -146,6 +156,8 @@ public class MockContactApi extends ContactApi {
                 return 0;
             } else if (COLUMN_DISPLAY_NAME.equals(column)) {
                 return 1;
+            } else if (COLUMN_PHONE_INDICATOR.equals(column)) {
+                return 2;
             }
 
             return -1;
@@ -157,6 +169,8 @@ public class MockContactApi extends ContactApi {
                 return mIdArray.get(mPosition);
             } else if (index == 1) {
                 return mDisplayNameArray.get(mPosition);
+            } else if (index == 2) {
+                return mHasPhoneArray.get(mPosition);
             }
 
             return null;

@@ -17,6 +17,11 @@ public class ContactApiSdk5 extends ContactApi {
     }
 
     @Override
+    public String getColumnPhoneIndicator() {
+        return ContactsContract.Contacts.HAS_PHONE_NUMBER;
+    }
+
+    @Override
     public String getColumnPhoneNumber() {
         return ContactsContract.CommonDataKinds.Phone.NUMBER;
     }
@@ -45,7 +50,8 @@ public class ContactApiSdk5 extends ContactApi {
         final Uri uri = ContactsContract.Contacts.CONTENT_URI;
         final String[] projection = new String[] {
                 ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME };
+                ContactsContract.Contacts.DISPLAY_NAME,
+                ContactsContract.Contacts.HAS_PHONE_NUMBER };
         return mResolver.query(uri, projection, null, null, null);
     }
 

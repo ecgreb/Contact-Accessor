@@ -25,13 +25,14 @@ public class ContactList extends ArrayList<ContactList.Contact> {
 
     private void importContacts() {
         Cursor c = mApi.queryContacts();
-        String id, displayName;
+        String id, displayName, hasPhone;
         Log.v("ContactList", "Contacts Base Count (pre-filter) = " + c.getCount());
         if (c.getCount() > 0) {
             while (c.moveToNext()) {
                 id = c.getString(c.getColumnIndex(mApi.getColumnId()));
                 displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
-                if (isValidContact(id, displayName)) {
+                hasPhone = c.getString(c.getColumnIndex(mApi.getColumnPhoneIndicator()));
+                if (isValidContact(id, displayName, hasPhone)) {
                     add(new Contact(id, displayName));
                 }
             }
@@ -39,14 +40,12 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         c.close();
     }
 
-    private boolean isValidContact(String id, String displayName) {
+    private boolean isValidContact(String id, String displayName, String hasPhone) {
         if (TextUtils.isEmpty(displayName)) {
             return false;
         }
 
-        Cursor phoneCursor = mApi.queryPhoneNumbers(id);
-        boolean hasPhoneNumber = (phoneCursor.getCount() > 0);
-        phoneCursor.close();
+        boolean hasPhoneNumber = (hasPhone != null && Integer.parseInt(hasPhone) > 0);
 
         Cursor emailCursor = mApi.queryEmailAddresses(id);
         boolean hasEmailAddress = (emailCursor.getCount() > 0);
