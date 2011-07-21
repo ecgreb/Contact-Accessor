@@ -18,10 +18,13 @@ public class MockContactApi extends ContactApi {
     private static final String COLUMN_DISPLAY_NAME = "displayName";
     private static final String COLUMN_NUMBER = "number";
     private static final String COLUMN_EMAIL = "email";
+    private static final String COLUMN_GIVEN_NAME = "givenName";
+    private static final String COLUMN_FAMILY_NAME = "familyName";
 
     private MockContactCursor mContactCursor = new MockContactCursor();
     private HashMap<String, MockDataCursor> mPhoneCursors = new HashMap<String, MockDataCursor>();
     private HashMap<String, MockDataCursor> mEmailCursors = new HashMap<String, MockDataCursor>();
+    private HashMap<String, MockNameCursor> mNameCursors = new HashMap<String, MockNameCursor>();
 
     public MockContactApi() {
         super();
@@ -48,6 +51,16 @@ public class MockContactApi extends ContactApi {
     }
 
     @Override
+    public String getColumnGivenName() {
+        return COLUMN_GIVEN_NAME;
+    }
+
+    @Override
+    public String getColumnFamilyName() {
+        return COLUMN_FAMILY_NAME;
+    }
+
+    @Override
     public Cursor queryContacts() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
@@ -71,6 +84,14 @@ public class MockContactApi extends ContactApi {
         return mEmailCursors.get(contactId);
     }
 
+    @Override
+    public Cursor queryStructuredName(String contactId) {
+        if (mResolver == null) {
+            throw new IllegalStateException("Content resolver has not been initialized");
+        }
+        return mNameCursors.get(contactId);
+    }
+
     public void addMockContact(String id, String name, String[] phoneArray, String[] emailArray) {
         mContactCursor.addValues(id, name);
 
@@ -85,6 +106,10 @@ public class MockContactApi extends ContactApi {
             mockEmailCursor.addValue(email);
         }
         mEmailCursors.put(id, mockEmailCursor);
+
+        MockNameCursor mockNameCursor = new MockNameCursor();
+        mockNameCursor.addValues("FirstName", "LastName");
+        mNameCursors.put(id, mockNameCursor);
     }
 
     public class MockContactCursor extends MockCursor {
@@ -92,10 +117,6 @@ public class MockContactApi extends ContactApi {
         private int mPosition = -1;
         private ArrayList<String> mIdArray = new ArrayList<String>();
         private ArrayList<String> mDisplayNameArray = new ArrayList<String>();
-
-        public MockContactCursor() {
-            super();
-        }
 
         public void addValues(String id, String displayName) {
             mIdArray.add(id);
@@ -136,6 +157,62 @@ public class MockContactApi extends ContactApi {
                 return mIdArray.get(mPosition);
             } else if (index == 1) {
                 return mDisplayNameArray.get(mPosition);
+            }
+
+            return null;
+        }
+
+        @Override
+        public void close() {
+            // Do nothing
+        }
+    }
+
+    public class MockNameCursor extends MockCursor {
+
+        private int mPosition = -1;
+        private ArrayList<String> mGivenNameArray = new ArrayList<String>();
+        private ArrayList<String> mFamilyNameArray = new ArrayList<String>();
+
+        public void addValues(String givenName, String familyName) {
+            mGivenNameArray.add(givenName);
+            mFamilyNameArray.add(familyName);
+        }
+
+        @Override
+        public int getCount() {
+            return mGivenNameArray.size();
+        }
+
+        @Override
+        public boolean moveToNext() {
+            int newPosition = mPosition + 1;
+
+            if (newPosition == mGivenNameArray.size()) {
+                return false;
+            }
+
+            mPosition = newPosition;
+            return true;
+        }
+
+        @Override
+        public int getColumnIndex(String column) {
+            if (COLUMN_GIVEN_NAME.equals(column)) {
+                return 0;
+            } else if (COLUMN_FAMILY_NAME.equals(column)) {
+                return 1;
+            }
+
+            return -1;
+        }
+
+        @Override
+        public String getString(int index) {
+            if (index == 0) {
+                return mGivenNameArray.get(mPosition);
+            } else if (index == 1) {
+                return mFamilyNameArray.get(mPosition);
             }
 
             return null;

@@ -106,6 +106,20 @@ public abstract class ContactApi {
     public abstract String getColumnEmailAddress();
 
     /**
+     * Get the database given name column.
+     *
+     * @return Cursor column name used to retrieve the given name.
+     */
+    public abstract String getColumnGivenName();
+
+    /**
+     * Get the database family name column.
+     *
+     * @return Cursor column name used to retrieve the family name.
+     */
+    public abstract String getColumnFamilyName();
+
+    /**
      * Query all contacts on the device.
      *
      * @return Cursor used to iterate over all contacts.
@@ -116,7 +130,7 @@ public abstract class ContactApi {
      * Query phone numbers for a single contact.
      *
      * @param contactId Contact row ID.
-     * @return Cursor used to iterate over phone numbers for one contact.
+     * @return Cursor used to iterate over phone numbers for single contact.
      */
     public abstract Cursor queryPhoneNumbers(String contactId);
 
@@ -124,8 +138,16 @@ public abstract class ContactApi {
      * Query email addresses for a single contact.
      *
      * @param contactId Contact row ID.
-     * @return Cursor used to iterate over email addresses for one contact.
+     * @return Cursor used to iterate over email addresses for single contact.
      */
     public abstract Cursor queryEmailAddresses(String contactId);
+
+    /**
+     * Query structured name for a single contact.
+     *
+     * @param contactId Contact row ID.
+     * @return Cursor used to iterate over structured name fields for single contact.
+     */
+    public abstract Cursor queryStructuredName(String contactId);
 
 }

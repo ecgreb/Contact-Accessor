@@ -28,6 +28,16 @@ public class ContactApiSdk3 extends ContactApi {
     }
 
     @Override
+    public String getColumnGivenName() {
+        return null;
+    }
+
+    @Override
+    public String getColumnFamilyName() {
+        return null;
+    }
+
+    @Override
     public Cursor queryContacts() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
@@ -57,6 +67,15 @@ public class ContactApiSdk3 extends ContactApi {
         final Uri uri = Contacts.ContactMethods.CONTENT_EMAIL_URI;
         final String query = Contacts.ContactMethods.PERSON_ID + " = ?";
         return mResolver.query(uri, null, query, new String[] { contactId }, null);
+    }
+
+    @Override
+    public Cursor queryStructuredName(String contactId) {
+        if (mResolver == null) {
+            throw new IllegalStateException("Content resolver has not been initialized");
+        }
+
+        return null;
     }
 
 }

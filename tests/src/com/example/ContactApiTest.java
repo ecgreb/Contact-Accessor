@@ -1,7 +1,6 @@
 package com.example;
 
 import android.os.Build;
-import android.os.Message;
 
 import junit.framework.TestCase;
 
@@ -35,7 +34,7 @@ public class ContactApiTest extends TestCase {
         assertEquals(className, mContactApi.getClass().getSimpleName());
     }
 
-    public void testContactQueryBeforeInitializingContentResolverThrowsIllegalStateException() {
+    public void testContactQueryBeforeInitializingContentResolverThrowsException() {
         Class type = null;
         String message = null;
 
@@ -50,7 +49,7 @@ public class ContactApiTest extends TestCase {
         assertEquals("Content resolver has not been initialized", message);
     }
 
-    public void testPhoneQueryBeforeInitializingContentResolverThrowsIllegalStateException() {
+    public void testPhoneQueryBeforeInitializingContentResolverThrowsException() {
         Class type = null;
         String message = null;
 
@@ -65,12 +64,27 @@ public class ContactApiTest extends TestCase {
         assertEquals("Content resolver has not been initialized", message);
     }
 
-    public void testEmailQueryBeforeInitializingContentResolverThrowsIllegalStateException() {
+    public void testEmailQueryBeforeInitializingContentResolverThrowsException() {
         Class type = null;
         String message = null;
 
         try {
             mContactApi.queryEmailAddresses("");
+        } catch (IllegalStateException e) {
+            type = e.getClass();
+            message = e.getMessage();
+        }
+
+        assertEquals(IllegalStateException.class, type);
+        assertEquals("Content resolver has not been initialized", message);
+    }
+
+    public void testStructuredNameQueryBeforeInitializingContentResolverThrowsException() {
+        Class type = null;
+        String message = null;
+
+        try {
+            mContactApi.queryStructuredName("");
         } catch (IllegalStateException e) {
             type = e.getClass();
             message = e.getMessage();

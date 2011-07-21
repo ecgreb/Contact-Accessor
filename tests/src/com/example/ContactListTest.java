@@ -157,12 +157,20 @@ public class ContactListTest extends TestCase {
     }
 
     public void testNonNumericCharactersAreStrippedFromPhoneNumber() {
-        String[] fakePhoneArray0 = { "123-456.78 90abc" };
+        String[] fakePhoneArray0 = { "123-4#56.78 90abc" };
         String[] fakeEmailArray0 = { "email0@test.com" };
         mMockContactApi.addMockContact("0", "Display Name 0", fakePhoneArray0, fakeEmailArray0);
 
         ContactList contactList = new ContactList(mMockContactApi);
         assertEquals("1234567890", contactList.get(0).getPhoneNumbers().get(0));
+    }
+
+    public void testGetStructuredName() {
+        generateSampleContacts(1);
+        ContactList contactList = new ContactList(mMockContactApi);
+        ContactList.StructuredName structuredName = contactList.get(0).getStructuredName();
+        assertEquals("FirstName", structuredName.givenName);
+        assertEquals("LastName", structuredName.familyName);
     }
 
     /**

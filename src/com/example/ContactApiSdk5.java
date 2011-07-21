@@ -27,6 +27,16 @@ public class ContactApiSdk5 extends ContactApi {
     }
 
     @Override
+    public String getColumnGivenName() {
+        return ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME;
+    }
+
+    @Override
+    public String getColumnFamilyName() {
+        return ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME;
+    }
+
+    @Override
     public Cursor queryContacts() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
@@ -57,4 +67,22 @@ public class ContactApiSdk5 extends ContactApi {
         final String query = ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?";
         return mResolver.query(uri, null, query, new String[] { contactId }, null);
     }
+
+    @Override
+    public Cursor queryStructuredName(String contactId) {
+        if (mResolver == null) {
+            throw new IllegalStateException("Content resolver has not been initialized");
+        }
+
+        final Uri uri = ContactsContract.Data.CONTENT_URI;
+        final String[] projection = new String[] {
+                ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
+                ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME };
+        final String query = ContactsContract.Data.CONTACT_ID +" = ? AND " +
+                ContactsContract.Data.MIMETYPE + "='" +
+                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE + "'";
+
+        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
+    }
+
 }
