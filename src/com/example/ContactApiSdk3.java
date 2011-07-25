@@ -13,13 +13,13 @@ public class ContactApiSdk3 extends ContactApi {
     }
 
     @Override
-    public String getColumnDisplayName() {
-        return Contacts.People.DISPLAY_NAME;
+    public String getColumnContactId() {
+        return Contacts.Phones.PERSON_ID;
     }
 
     @Override
-    public String getColumnPhoneIndicator() {
-        return Contacts.People.PRIMARY_PHONE_ID;
+    public String getColumnDisplayName() {
+        return Contacts.People.DISPLAY_NAME;
     }
 
     @Override
@@ -51,37 +51,41 @@ public class ContactApiSdk3 extends ContactApi {
         final Uri uri = Contacts.People.CONTENT_URI;
         final String[] projection = new String[] {
                 Contacts.People._ID,
-                Contacts.People.DISPLAY_NAME,
-                Contacts.People.PRIMARY_PHONE_ID };
+                Contacts.People.DISPLAY_NAME };
+
         return mResolver.query(uri, projection, null, null, null);
     }
 
     @Override
-    public Cursor queryPhoneNumbers(String contactId) {
+    public Cursor queryPhoneNumbers() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
         }
 
         final Uri uri = Contacts.Phones.CONTENT_URI;
-        final String[] projection = new String[] { Contacts.Phones.NUMBER };
-        final String query = Contacts.Phones.PERSON_ID + " = ?";
-        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
+        final String[] projection = new String[] {
+                Contacts.Phones.PERSON_ID,
+                Contacts.Phones.NUMBER };
+
+        return mResolver.query(uri, projection, null, null, null);
     }
 
     @Override
-    public Cursor queryEmailAddresses(String contactId) {
+    public Cursor queryEmailAddresses() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
         }
 
-        final Uri uri = Contacts.ContactMethods.CONTENT_EMAIL_URI;
-        final String[] projection = new String[] { Contacts.ContactMethods.DATA };
-        final String query = Contacts.ContactMethods.PERSON_ID + " = ?";
-        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
+        final Uri uri = Contacts.ContactMethods.CONTENT_URI;
+        final String[] projection = new String[] {
+                Contacts.ContactMethods.PERSON_ID,
+                Contacts.ContactMethods.DATA };
+
+        return mResolver.query(uri, projection, null, null, null);
     }
 
     @Override
-    public Cursor queryStructuredName(String contactId) {
+    public Cursor queryStructuredNames() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
         }

@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -15,95 +16,125 @@ import java.util.List;
  */
 public class ContactList extends ArrayList<ContactList.Contact> {
 
+    private static final String TAG = "ContactList";
+
     private ContactApi mApi;
+    private HashMap<String, List<String>> mEmailMap = new HashMap<String, List<String>>();
+    private HashMap<String, List<String>> mPhoneMap = new HashMap<String, List<String>>();
+    private HashMap<String, StructuredName> mNameMap = new HashMap<String, StructuredName>();
 
     public ContactList(ContactApi api) {
         super();
         mApi = api;
+        importPhoneNumbers();
+        importEmailAddresses();
+        importStructuredNames();
         importContacts();
+    }
+
+    private void importPhoneNumbers() {
+        Cursor c = mApi.queryPhoneNumbers();
+        if (c != null) {
+            String id, phone;
+            int count = c.getCount();
+            if (count > 0) {
+                while (c.moveToNext()) {
+                    id = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
+                    phone = c.getString(c.getColumnIndex(mApi.getColumnPhoneNumber()));
+                    phone = phone.replaceAll("[^\\d]", "");
+                    ArrayList<String> entry = (ArrayList<String>) mPhoneMap.get(id);
+                    if (entry == null) {
+                        entry = new ArrayList<String>();
+                    }
+                    entry.add(phone);
+                    mPhoneMap.put(id, entry);
+                }
+            }
+            Log.v(TAG, "Phone Map Size = " + mPhoneMap.size());
+            Log.v(TAG, "Phone Map = " + mPhoneMap.toString());
+            c.close();
+        }
+    }
+
+    private void importEmailAddresses() {
+        Cursor c = mApi.queryEmailAddresses();
+        if (c != null) {
+            String id, email;
+            int count = c.getCount();
+            if (count > 0) {
+                while (c.moveToNext()) {
+                    id = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
+                    email = c.getString(c.getColumnIndex(mApi.getColumnEmailAddress()));
+                    ArrayList<String> entry = (ArrayList<String>) mEmailMap.get(id);
+                    if (entry == null) {
+                        entry = new ArrayList<String>();
+                    }
+                    entry.add(email);
+                    mEmailMap.put(id, entry);
+                }
+            }
+            Log.v(TAG, "Email Map Size = " + mEmailMap.size());
+            Log.v(TAG, "Email Map = " + mEmailMap.toString());
+            c.close();
+        }
+    }
+
+    private void importStructuredNames() {
+        Cursor c = mApi.queryStructuredNames();
+        if (c != null) {
+            String contactId;
+            StructuredName name = new StructuredName();
+            if (c.getCount() > 0) {
+
+                while (c.moveToNext()) {
+                    contactId = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
+                    name.givenName = c.getString(c.getColumnIndex(mApi.getColumnGivenName()));
+                    name.familyName = c.getString(c.getColumnIndex(mApi.getColumnFamilyName()));
+                    mNameMap.put(contactId, name);
+                }
+            }
+            Log.v(TAG, "Name Map Size = " + mNameMap.size());
+            Log.v(TAG, "Name Map = " + mNameMap.toString());
+            c.close();
+        }
     }
 
     private void importContacts() {
         Cursor c = mApi.queryContacts();
-        String id, displayName, hasPhone;
-        Log.v("ContactList", "Contacts Base Count (pre-filter) = " + c.getCount());
-        if (c.getCount() > 0) {
-            while (c.moveToNext()) {
-                id = c.getString(c.getColumnIndex(mApi.getColumnId()));
-                displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
-                hasPhone = c.getString(c.getColumnIndex(mApi.getColumnPhoneIndicator()));
-                if (isValidContact(id, displayName, hasPhone)) {
-                    add(new Contact(id, displayName));
+        if (c != null) {
+            String id, displayName;
+            Log.v(TAG, "Contacts Base Count = " + c.getCount());
+            if (c.getCount() > 0) {
+                while (c.moveToNext()) {
+                    id = c.getString(c.getColumnIndex(mApi.getColumnId()));
+                    displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
+                    if (isValidContact(id, displayName)) {
+                        add(new Contact(id, displayName));
+                    }
                 }
             }
+            Log.v(TAG, "Contact List Size = " + this.size());
+            Log.v(TAG, "Contact List = " + this.toString());
+            c.close();
         }
-        c.close();
     }
 
-    private boolean isValidContact(String id, String displayName, String hasPhone) {
+    private boolean isValidContact(String id, String displayName) {
         if (TextUtils.isEmpty(displayName)) {
             return false;
         }
 
-        boolean hasPhoneNumber = (hasPhone != null && Integer.parseInt(hasPhone) > 0);
+        boolean hasPhoneNumber = false;
+        if (mPhoneMap != null) {
+            hasPhoneNumber = (mPhoneMap.get(id) != null);
+        }
 
-        Cursor emailCursor = mApi.queryEmailAddresses(id);
-        boolean hasEmailAddress = (emailCursor.getCount() > 0);
-        emailCursor.close();
+        boolean hasEmailAddress = false;
+        if (mEmailMap != null) {
+            hasEmailAddress = (mEmailMap.get(id) != null);
+        }
 
         return hasPhoneNumber || hasEmailAddress;
-    }
-
-    List<String> importPhoneNumbersById(String id) {
-        Cursor c = mApi.queryPhoneNumbers(id);
-        ArrayList<String> phoneList = new ArrayList<String>();
-        String phoneNumber;
-        if (c != null) {
-            if (c.getCount() > 0) {
-                while (c.moveToNext()) {
-                    phoneNumber = c.getString(c.getColumnIndex(mApi.getColumnPhoneNumber()));
-                    phoneNumber = phoneNumber.replaceAll("[^\\d]", "");
-                    if (!TextUtils.isEmpty(phoneNumber)) {
-                        phoneList.add(phoneNumber);
-                    }
-                }
-            }
-            c.close();
-        }
-        return phoneList;
-    }
-
-    List<String> importEmailAddressesById(String id) {
-        Cursor c = mApi.queryEmailAddresses(id);
-        ArrayList<String> emailList = new ArrayList<String>();
-        String emailAddress;
-        if (c != null) {
-            if (c.getCount() > 0) {
-                while (c.moveToNext()) {
-                    emailAddress = c.getString(c.getColumnIndex(mApi.getColumnEmailAddress()));
-                    if (!TextUtils.isEmpty(emailAddress)) {
-                        emailList.add(emailAddress);
-                    }
-                }
-            }
-            c.close();
-        }
-        return emailList;
-    }
-
-    StructuredName importStructuredName(String id) {
-        Cursor c = mApi.queryStructuredName(id);
-        StructuredName name = new StructuredName();
-        if (c != null) {
-            if (c.getCount() > 0) {
-                while (c.moveToNext()) {
-                    name.givenName = c.getString(c.getColumnIndex(mApi.getColumnGivenName()));
-                    name.familyName = c.getString(c.getColumnIndex(mApi.getColumnFamilyName()));
-                }
-            }
-            c.close();
-        }
-        return name;
     }
 
     public class Contact {
@@ -120,15 +151,15 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         }
 
         public List<String> getPhoneNumbers() {
-            return importPhoneNumbersById(mId);
+            return mPhoneMap.get(mId);
         }
 
         public List<String> getEmailAddresses() {
-            return importEmailAddressesById(mId);
+            return mEmailMap.get(mId);
         }
 
         public StructuredName getStructuredName() {
-            return importStructuredName(mId);
+            return mNameMap.get(mId);
         }
 
         @Override
@@ -136,9 +167,9 @@ public class ContactList extends ArrayList<ContactList.Contact> {
             return "Contact{" +
                     "id='" + mId + '\'' +
                     ", displayName='" + mDisplayName + '\'' +
-                    ", phoneNumbers='" + getPhoneNumbers().toString() + '\'' +
-                    ", emailAddresses='" + getEmailAddresses().toString() + '\'' +
-                    ", structuredName='" + getStructuredName().toString() + '\'' +
+                    ", phoneNumbers='" + getPhoneNumbers() + '\'' +
+                    ", emailAddresses='" + getEmailAddresses() + '\'' +
+                    ", structuredName='" + getStructuredName() + '\'' +
                     '}';
         }
     }

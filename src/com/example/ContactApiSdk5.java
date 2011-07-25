@@ -4,6 +4,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 
+import java.lang.reflect.Array;
+
 public class ContactApiSdk5 extends ContactApi {
 
     @Override
@@ -12,13 +14,13 @@ public class ContactApiSdk5 extends ContactApi {
     }
 
     @Override
-    public String getColumnDisplayName() {
-        return ContactsContract.Contacts.DISPLAY_NAME;
+    public String getColumnContactId() {
+        return ContactsContract.Data.CONTACT_ID;
     }
 
     @Override
-    public String getColumnPhoneIndicator() {
-        return ContactsContract.Contacts.HAS_PHONE_NUMBER;
+    public String getColumnDisplayName() {
+        return ContactsContract.Contacts.DISPLAY_NAME;
     }
 
     @Override
@@ -50,50 +52,54 @@ public class ContactApiSdk5 extends ContactApi {
         final Uri uri = ContactsContract.Contacts.CONTENT_URI;
         final String[] projection = new String[] {
                 ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME,
-                ContactsContract.Contacts.HAS_PHONE_NUMBER };
+                ContactsContract.Contacts.DISPLAY_NAME };
         return mResolver.query(uri, projection, null, null, null);
     }
 
     @Override
-    public Cursor queryPhoneNumbers(String contactId) {
-        if (mResolver == null) {
-            throw new IllegalStateException("Content resolver has not been initialized");
-        }
-
-        final Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
-        final String[] projection = new String[] { ContactsContract.CommonDataKinds.Phone.NUMBER };
-        final String query = ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?";
-        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
-    }
-
-    @Override
-    public Cursor queryEmailAddresses(String contactId) {
-        if (mResolver == null) {
-            throw new IllegalStateException("Content resolver has not been initialized");
-        }
-
-        final Uri uri = ContactsContract.CommonDataKinds.Email.CONTENT_URI;
-        final String[] projection = new String[] { ContactsContract.CommonDataKinds.Email.DATA };
-        final String query = ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?";
-        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
-    }
-
-    @Override
-    public Cursor queryStructuredName(String contactId) {
+    public Cursor queryPhoneNumbers() {
         if (mResolver == null) {
             throw new IllegalStateException("Content resolver has not been initialized");
         }
 
         final Uri uri = ContactsContract.Data.CONTENT_URI;
         final String[] projection = new String[] {
+                ContactsContract.Data.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Phone.NUMBER };
+        final String query = ContactsContract.Data.MIMETYPE + " = ?";
+        final String selection = ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE;
+        return mResolver.query(uri, projection, query, new String[] { selection }, null);
+    }
+
+    @Override
+    public Cursor queryEmailAddresses() {
+        if (mResolver == null) {
+            throw new IllegalStateException("Content resolver has not been initialized");
+        }
+
+        final Uri uri = ContactsContract.Data.CONTENT_URI;
+        final String[] projection = new String[] {
+                ContactsContract.Data.CONTACT_ID,
+                ContactsContract.CommonDataKinds.Email.DATA };
+        final String query = ContactsContract.Data.MIMETYPE + " = ?";
+        final String selection = ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE;
+        return mResolver.query(uri, projection, query, new String[] { selection }, null);
+    }
+
+    @Override
+    public Cursor queryStructuredNames() {
+        if (mResolver == null) {
+            throw new IllegalStateException("Content resolver has not been initialized");
+        }
+
+        final Uri uri = ContactsContract.Data.CONTENT_URI;
+        final String[] projection = new String[] {
+                ContactsContract.Data.CONTACT_ID,
                 ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
                 ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME };
-        final String query = ContactsContract.Data.CONTACT_ID + " = ? AND " +
-                ContactsContract.Data.MIMETYPE + "='" +
-                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE + "'";
-
-        return mResolver.query(uri, projection, query, new String[] { contactId }, null);
+        final String query = ContactsContract.Data.MIMETYPE + " = ?";
+        final String selection = ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE;
+        return mResolver.query(uri, projection, query, new String[] { selection }, null);
     }
 
 }

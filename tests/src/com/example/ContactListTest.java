@@ -1,6 +1,7 @@
 package com.example;
 
 import android.test.mock.MockContentResolver;
+import android.util.Log;
 
 import junit.framework.TestCase;
 
@@ -72,7 +73,7 @@ public class ContactListTest extends TestCase {
         generateSampleContacts(1);
         String[] fakePhoneArray = { "1111111111" };
         String[] fakeEmailArray = { "email1@test.com" };
-        mMockContactApi.addMockContact("1", "", "1", fakePhoneArray, fakeEmailArray);
+        mMockContactApi.addMockContact("1", "", fakePhoneArray, fakeEmailArray);
         ContactList contactList = new ContactList(mMockContactApi);
         assertEquals(1, contactList.size());
         assertEquals("Display Name 0", contactList.get(0).getDisplayName());
@@ -97,7 +98,7 @@ public class ContactListTest extends TestCase {
     public void testGetContactWithMultiplePhoneNumbers() {
         String[] fakePhoneArray = { "0000000000", "0000000001" };
         String[] fakeEmailArray = { "email1@test.com" };
-        mMockContactApi.addMockContact("0", "Display Name 0", "1", fakePhoneArray, fakeEmailArray);
+        mMockContactApi.addMockContact("0", "Display Name 0", fakePhoneArray, fakeEmailArray);
         ContactList contactList = new ContactList(mMockContactApi);
         List<String> phoneList = contactList.get(0).getPhoneNumbers();
         assertEquals(2, phoneList.size());
@@ -124,7 +125,7 @@ public class ContactListTest extends TestCase {
     public void testGetContactWithMultipleEmailAddresses() {
         String[] fakePhoneArray = { "0000000000" };
         String[] fakeEmailArray = { "email@test01.com", "email@test02.com" };
-        mMockContactApi.addMockContact("0", "Display Name 0", "1", fakePhoneArray, fakeEmailArray);
+        mMockContactApi.addMockContact("0", "Display Name 0", fakePhoneArray, fakeEmailArray);
         ContactList contactList = new ContactList(mMockContactApi);
         List<String> emailList = contactList.get(0).getEmailAddresses();
         assertEquals(2, emailList.size());
@@ -135,19 +136,19 @@ public class ContactListTest extends TestCase {
     public void testContactWithNoPhoneAndNoEmailIsExcludedFromList() {
         String[] fakePhoneArray0 = { "0000000000" };
         String[] fakeEmailArray0 = { "email0@test.com" };
-        mMockContactApi.addMockContact("0", "Phone & Email", "1", fakePhoneArray0, fakeEmailArray0);
+        mMockContactApi.addMockContact("0", "Phone & Email", fakePhoneArray0, fakeEmailArray0);
 
         String[] fakePhoneArray1 = { "1111111111" };
         String[] fakeEmailArray1 = { };
-        mMockContactApi.addMockContact("1", "Phone Only", "1", fakePhoneArray1, fakeEmailArray1);
+        mMockContactApi.addMockContact("1", "Phone Only", fakePhoneArray1, fakeEmailArray1);
 
         String[] fakePhoneArray2 = { };
         String[] fakeEmailArray2 = { "email2@test.com" };
-        mMockContactApi.addMockContact("2", "Email Only", "0", fakePhoneArray2, fakeEmailArray2);
+        mMockContactApi.addMockContact("2", "Email Only", fakePhoneArray2, fakeEmailArray2);
 
         String[] fakePhoneArray3 = { };
         String[] fakeEmailArray3 = { };
-        mMockContactApi.addMockContact("3", "Neither", "0", fakePhoneArray3, fakeEmailArray3);
+        mMockContactApi.addMockContact("3", "Neither", fakePhoneArray3, fakeEmailArray3);
 
         ContactList contactList = new ContactList(mMockContactApi);
         assertEquals(3, contactList.size());
@@ -159,7 +160,7 @@ public class ContactListTest extends TestCase {
     public void testNonNumericCharactersAreStrippedFromPhoneNumber() {
         String[] fakePhoneArray0 = { "123-4#56.78 90abc" };
         String[] fakeEmailArray0 = { "email0@test.com" };
-        mMockContactApi.addMockContact("0", "Display Name 0", "1", fakePhoneArray0, fakeEmailArray0);
+        mMockContactApi.addMockContact("0", "Display Name 0", fakePhoneArray0, fakeEmailArray0);
 
         ContactList contactList = new ContactList(mMockContactApi);
         assertEquals("1234567890", contactList.get(0).getPhoneNumbers().get(0));
@@ -169,6 +170,8 @@ public class ContactListTest extends TestCase {
         generateSampleContacts(1);
         ContactList contactList = new ContactList(mMockContactApi);
         ContactList.StructuredName structuredName = contactList.get(0).getStructuredName();
+        Log.v("ContactListTest", structuredName.toString());
+
         assertEquals("FirstName", structuredName.givenName);
         assertEquals("LastName", structuredName.familyName);
     }
@@ -188,7 +191,7 @@ public class ContactListTest extends TestCase {
             name = "Display Name " + i;
             phoneArray[0] = id + id + id + id + id + id + id + id + id + id;
             emailArray[0] = "email" + id + "@test.com";
-            mMockContactApi.addMockContact(id, name, "1", phoneArray, emailArray);
+            mMockContactApi.addMockContact(id, name, phoneArray, emailArray);
         }
     }
 

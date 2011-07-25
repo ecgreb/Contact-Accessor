@@ -1,9 +1,10 @@
 package com.example;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,44 +18,59 @@ public class MyActivity extends ListActivity {
 
     private static final String TAG = "MyActivity";
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.main);
+//        setContentView(R.layout.main);
+//        Debug.startMethodTracing("contactapi");
 
-        Debug.startMethodTracing("contactapi");
-        long startTime = System.currentTimeMillis();
+        Void[] params = new Void[] { };
+        new LoadContactsTask().execute(params);
 
-        ContactApi contactApi = ContactApi.getInstance();
-        contactApi.initContentResolver(getContentResolver());
+    }
 
-        Log.v(TAG, "Got instance of " + contactApi.getClass().getSimpleName());
+    private class LoadContactsTask extends AsyncTask<Void, Void, ContactList> {
+        long startTime, endTime, logTime, uiTime;
+        private final ProgressDialog dialog = new ProgressDialog(MyActivity.this);
 
-        ContactList contactList = new ContactList(contactApi);
-
-        Log.v(TAG, "Contact List Size (post-filter) = " + contactList.size());
-
-        long endTime = System.currentTimeMillis();
-
-        Log.v(TAG, "---------------------- Contacts -----------------------");
-        for (ContactList.Contact contact : contactList) {
-            Log.v(TAG, contact.toString());
+        protected void onPreExecute() {
+            dialog.setMessage("Loading contacts...");
+            dialog.show();
         }
 
-        long logTime = System.currentTimeMillis();
+        protected ContactList doInBackground(Void... params) {
+            startTime = System.currentTimeMillis();
 
-        setListAdapter(new ContactArrayAdapter(this, R.layout.list_item, contactList));
+            ContactApi api = ContactApi.getInstance();
+            api.initContentResolver(getContentResolver());
+            return new ContactList(api);
+        }
 
-        long uiTime = System.currentTimeMillis();
-        Debug.stopMethodTracing();
+        protected void onPostExecute(ContactList contactList) {
+            endTime = System.currentTimeMillis();
 
-        Log.v(TAG, "---------------------- Benchmarks -----------------------");
-        Log.v(TAG, "Generate List: " + (endTime - startTime));
-        Log.v(TAG, "Log Details: " + (logTime - endTime));
-        Log.v(TAG, "Populate UI: " + (uiTime - logTime));
+//            Log.v(TAG, "---------------------- Contacts -----------------------");
+//            for (ContactList.Contact contact : contactList) {
+//                Log.v(TAG, contact.toString());
+//            }
 
+            logTime = System.currentTimeMillis();
 
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+
+            setListAdapter(new ContactArrayAdapter(MyActivity.this.getApplicationContext(),
+                    R.layout.list_item, contactList));
+
+            uiTime = System.currentTimeMillis();
+//            Debug.stopMethodTracing();
+
+            Log.v(TAG, "---------------------- Benchmarks -----------------------");
+            Log.v(TAG, "Generate List: " + (endTime - startTime));
+//            Log.v(TAG, "Log Details: " + (logTime - endTime));
+            Log.v(TAG, "Populate UI: " + (uiTime - logTime));
+        }
     }
 
     private class ContactArrayAdapter extends ArrayAdapter<ContactList.Contact>

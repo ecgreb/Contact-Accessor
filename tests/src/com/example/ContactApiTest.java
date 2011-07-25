@@ -54,7 +54,7 @@ public class ContactApiTest extends TestCase {
         String message = null;
 
         try {
-            mContactApi.queryPhoneNumbers("");
+            mContactApi.queryPhoneNumbers();
         } catch (IllegalStateException e) {
             type = e.getClass();
             message = e.getMessage();
@@ -69,7 +69,7 @@ public class ContactApiTest extends TestCase {
         String message = null;
 
         try {
-            mContactApi.queryEmailAddresses("");
+            mContactApi.queryEmailAddresses();
         } catch (IllegalStateException e) {
             type = e.getClass();
             message = e.getMessage();
@@ -84,7 +84,7 @@ public class ContactApiTest extends TestCase {
         String message = null;
 
         try {
-            mContactApi.queryStructuredName("");
+            mContactApi.queryStructuredNames();
         } catch (IllegalStateException e) {
             type = e.getClass();
             message = e.getMessage();

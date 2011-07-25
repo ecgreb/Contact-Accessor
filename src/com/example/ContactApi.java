@@ -67,8 +67,8 @@ public abstract class ContactApi {
 
     /**
      * Initialize the {@link ContentResolver} used to execute queries. The resolver instance  must
-     * be initialized before calling {@link #queryContacts()}, {@link #queryPhoneNumbers(String)},
-     * or {@link #queryEmailAddresses(String)}.
+     * be initialized before calling {@link #queryContacts()}, {@link #queryPhoneNumbers()},
+     * or {@link #queryEmailAddresses()}.
      *
      * @param contentResolver Reference to the parent application's {@link ContentResolver} obtained
      * by calling {@link android.app.Activity#getContentResolver()}
@@ -85,18 +85,18 @@ public abstract class ContactApi {
     public abstract String getColumnId();
 
     /**
+     * Get the database display contact ID column.
+     *
+     * @return Cursor column name used to retrieve contact ID.
+     */
+    public abstract String getColumnContactId();
+
+    /**
      * Get the database display name column.
      *
      * @return Cursor column name used to retrieve contact display name.
      */
     public abstract String getColumnDisplayName();
-
-    /**
-     * Get phone indicator column
-     *
-     * @return Cursor column used to determine if contact has at least one phone number
-     */
-    public abstract String getColumnPhoneIndicator();
 
     /**
      * Get the database phone number column.
@@ -134,27 +134,24 @@ public abstract class ContactApi {
     public abstract Cursor queryContacts();
 
     /**
-     * Query phone numbers for a single contact.
+     * Query phone numbers for all contacts.
      *
-     * @param contactId Contact row ID.
-     * @return Cursor used to iterate over phone numbers for single contact.
+     * @return Cursor used to iterate over phone numbers.
      */
-    public abstract Cursor queryPhoneNumbers(String contactId);
+    public abstract Cursor queryPhoneNumbers();
 
     /**
-     * Query email addresses for a single contact.
+     * Query email addresses for all contacts.
      *
-     * @param contactId Contact row ID.
-     * @return Cursor used to iterate over email addresses for single contact.
+     * @return Cursor used to iterate over email addresses.
      */
-    public abstract Cursor queryEmailAddresses(String contactId);
+    public abstract Cursor queryEmailAddresses();
 
     /**
-     * Query structured name for a single contact.
+     * Query structured name for all contacts.
      *
-     * @param contactId Contact row ID.
-     * @return Cursor used to iterate over structured name fields for single contact.
+     * @return Cursor used to iterate over structured name fields.
      */
-    public abstract Cursor queryStructuredName(String contactId);
+    public abstract Cursor queryStructuredNames();
 
 }
