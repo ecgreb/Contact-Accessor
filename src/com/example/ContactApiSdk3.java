@@ -52,8 +52,9 @@ public class ContactApiSdk3 extends ContactApi {
         final String[] projection = new String[] {
                 Contacts.People._ID,
                 Contacts.People.DISPLAY_NAME };
+        final String sort = Contacts.People.DISPLAY_NAME + " ASC";
 
-        return mResolver.query(uri, projection, null, null, null);
+        return mResolver.query(uri, projection, null, null, sort);
     }
 
     @Override
