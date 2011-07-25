@@ -51,7 +51,7 @@ public class ContactList extends ArrayList<ContactList.Contact> {
                 }
             }
             Log.v(TAG, "Phone Map Size = " + mPhoneMap.size());
-            Log.v(TAG, "Phone Map = " + mPhoneMap.toString());
+            // Log.v(TAG, "Phone Map = " + mPhoneMap.toString());
             c.close();
         }
     }
@@ -74,7 +74,7 @@ public class ContactList extends ArrayList<ContactList.Contact> {
                 }
             }
             Log.v(TAG, "Email Map Size = " + mEmailMap.size());
-            Log.v(TAG, "Email Map = " + mEmailMap.toString());
+            // Log.v(TAG, "Email Map = " + mEmailMap.toString());
             c.close();
         }
     }
@@ -83,18 +83,18 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         Cursor c = mApi.queryStructuredNames();
         if (c != null) {
             String contactId;
-            StructuredName name = new StructuredName();
+            StructuredName name;
             if (c.getCount() > 0) {
-
                 while (c.moveToNext()) {
-                    contactId = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
+                    name = new StructuredName();
                     name.givenName = c.getString(c.getColumnIndex(mApi.getColumnGivenName()));
                     name.familyName = c.getString(c.getColumnIndex(mApi.getColumnFamilyName()));
+                    contactId = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
                     mNameMap.put(contactId, name);
                 }
             }
             Log.v(TAG, "Name Map Size = " + mNameMap.size());
-            Log.v(TAG, "Name Map = " + mNameMap.toString());
+            // Log.v(TAG, "Name Map = " + mNameMap.toString());
             c.close();
         }
     }
@@ -114,7 +114,7 @@ public class ContactList extends ArrayList<ContactList.Contact> {
                 }
             }
             Log.v(TAG, "Contact List Size = " + this.size());
-            Log.v(TAG, "Contact List = " + this.toString());
+            // Log.v(TAG, "Contact List = " + this.toString());
             c.close();
         }
     }
