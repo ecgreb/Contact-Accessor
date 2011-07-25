@@ -49,10 +49,10 @@ public class MyActivity extends ListActivity {
         protected void onPostExecute(ContactList contactList) {
             endTime = System.currentTimeMillis();
 
-//            Log.v(TAG, "---------------------- Contacts -----------------------");
-//            for (ContactList.Contact contact : contactList) {
-//                Log.v(TAG, contact.toString());
-//            }
+            Log.v(TAG, "---------------------- Contacts -----------------------");
+            for (ContactList.Contact contact : contactList) {
+                Log.v(TAG, contact.toString());
+            }
 
             logTime = System.currentTimeMillis();
 
@@ -68,7 +68,7 @@ public class MyActivity extends ListActivity {
 
             Log.v(TAG, "---------------------- Benchmarks -----------------------");
             Log.v(TAG, "Generate List: " + (endTime - startTime));
-//            Log.v(TAG, "Log Details: " + (logTime - endTime));
+            Log.v(TAG, "Log Details: " + (logTime - endTime));
             Log.v(TAG, "Populate UI: " + (uiTime - logTime));
         }
     }
