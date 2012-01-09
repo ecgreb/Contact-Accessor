@@ -1,28 +1,39 @@
 package com.example;
 
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 
 /**
- * Created by IntelliJ IDEA.
+ * Data structure to parse and store contacts on the device. Uses SDK specific implementation of
+ * {@link ContactApi} to access database.
  *
- * @author cgreb
- * @since 2011-07-15 14:29 ET
+ * @author Chuck Greb <charles.greb@gmail.com>
  */
 public class ContactList extends ArrayList<ContactList.Contact> {
 
-    private static final String TAG = "ContactList";
-
+    /** Reference to SDK-specific implementation of the Contacts API */
     private ContactApi mApi;
-    private HashMap<String, List<String>> mEmailMap = new HashMap<String, List<String>>();
-    private HashMap<String, List<String>> mPhoneMap = new HashMap<String, List<String>>();
-    private HashMap<String, StructuredName> mNameMap = new HashMap<String, StructuredName>();
 
+    /** Map used to lookup phone numbers by contact ID */
+    HashMap<Integer, HashSet<String>> mPhoneMap = new HashMap<Integer, HashSet<String>>();
+
+    /** Map used to lookup email addresses by contact ID */
+    HashMap<Integer, HashSet<String>> mEmailMap = new HashMap<Integer, HashSet<String>>();
+
+    /** Map used to lookup given/family name by contact ID */
+    HashMap<Integer, StructuredName> mNameMap = new HashMap<Integer, StructuredName>();
+
+    /**
+     * Create new {@link ContactList} object. Executes database queries to populate all data fields
+     * on init.
+     *
+     * @param api SDK-specific implementation of {@link ContactApi}.
+     */
     public ContactList(ContactApi api) {
         super();
         mApi = api;
@@ -32,94 +43,114 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         importContacts();
     }
 
+    /**
+     * Imports phone numbers from device DB and stores as map of ArrayLists keyed by contact ID.
+     */
     private void importPhoneNumbers() {
         Cursor c = mApi.queryPhoneNumbers();
         if (c != null) {
-            String id, phone;
+            int id;
+            String phone;
             int count = c.getCount();
             if (count > 0) {
                 while (c.moveToNext()) {
-                    id = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
+                    id = c.getInt(c.getColumnIndex(mApi.getColumnContactId()));
                     phone = c.getString(c.getColumnIndex(mApi.getColumnPhoneNumber()));
                     phone = phone.replaceAll("[^\\d]", "");
-                    ArrayList<String> entry = (ArrayList<String>) mPhoneMap.get(id);
+                    HashSet<String> entry = (HashSet<String>) mPhoneMap.get(id);
                     if (entry == null) {
-                        entry = new ArrayList<String>();
+                        entry = new HashSet<String>();
                     }
                     entry.add(phone);
                     mPhoneMap.put(id, entry);
                 }
             }
-            Log.v(TAG, "Phone Map Size = " + mPhoneMap.size());
-            // Log.v(TAG, "Phone Map = " + mPhoneMap.toString());
             c.close();
         }
     }
 
+    /**
+     * Imports email addresses from device DB and stores as map of ArrayLists keyed by contact ID.
+     */
     private void importEmailAddresses() {
         Cursor c = mApi.queryEmailAddresses();
         if (c != null) {
-            String id, email;
+            int id;
+            String email;
             int count = c.getCount();
             if (count > 0) {
                 while (c.moveToNext()) {
-                    id = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
+                    id = c.getInt(c.getColumnIndex(mApi.getColumnContactId()));
                     email = c.getString(c.getColumnIndex(mApi.getColumnEmailAddress()));
-                    ArrayList<String> entry = (ArrayList<String>) mEmailMap.get(id);
+                    HashSet<String> entry = (HashSet<String>) mEmailMap.get(id);
                     if (entry == null) {
-                        entry = new ArrayList<String>();
+                        entry = new HashSet<String>();
                     }
                     entry.add(email);
                     mEmailMap.put(id, entry);
                 }
             }
-            Log.v(TAG, "Email Map Size = " + mEmailMap.size());
-            // Log.v(TAG, "Email Map = " + mEmailMap.toString());
             c.close();
         }
     }
 
+    /**
+     * Imports given/family names from device DB and stores as map of {@link StructuredName} objects
+     * keyed by contact ID.
+     */
     private void importStructuredNames() {
         Cursor c = mApi.queryStructuredNames();
         if (c != null) {
-            String contactId;
+            int id;
             StructuredName name;
             if (c.getCount() > 0) {
                 while (c.moveToNext()) {
                     name = new StructuredName();
                     name.givenName = c.getString(c.getColumnIndex(mApi.getColumnGivenName()));
                     name.familyName = c.getString(c.getColumnIndex(mApi.getColumnFamilyName()));
-                    contactId = c.getString(c.getColumnIndex(mApi.getColumnContactId()));
-                    mNameMap.put(contactId, name);
+                    id = c.getInt(c.getColumnIndex(mApi.getColumnContactId()));
+                    mNameMap.put(id, name);
                 }
             }
-            Log.v(TAG, "Name Map Size = " + mNameMap.size());
-            // Log.v(TAG, "Name Map = " + mNameMap.toString());
             c.close();
         }
     }
 
+    /**
+     * Imports all contacts in device DB and adds them to {@link ContactList}. Invalid contacts
+     * are not added.
+     *
+     * @see {@link #isValidContact(int, String)}
+     */
     private void importContacts() {
         Cursor c = mApi.queryContacts();
         if (c != null) {
-            String id, displayName;
-            Log.v(TAG, "Contacts Base Count = " + c.getCount());
+            int id;
+            String displayName;
             if (c.getCount() > 0) {
                 while (c.moveToNext()) {
-                    id = c.getString(c.getColumnIndex(mApi.getColumnId()));
+                    id = c.getInt(c.getColumnIndex(mApi.getColumnId()));
                     displayName = c.getString(c.getColumnIndex(mApi.getColumnDisplayName()));
                     if (isValidContact(id, displayName)) {
                         add(new Contact(id, displayName));
                     }
                 }
             }
-            Log.v(TAG, "Contact List Size = " + this.size());
-            // Log.v(TAG, "Contact List = " + this.toString());
             c.close();
         }
     }
 
-    private boolean isValidContact(String id, String displayName) {
+    /**
+     * Determines validity of an individual contact. A contact is invalid if
+     * <ol>
+     *     <li>Contact display name is empty.</li>
+     *     <li>Contact does not have at least one phone number OR one email address.</li>
+     * </ol>
+     * @param id Contact database row ID.
+     * @param displayName Contact display name.
+     * @return False if contact fails either test, otherwise true.
+     */
+    private boolean isValidContact(int id, String displayName) {
         if (TextUtils.isEmpty(displayName)) {
             return false;
         }
@@ -137,29 +168,51 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         return hasPhoneNumber || hasEmailAddress;
     }
 
+    /**
+     * Import bitmap from database if available.
+     *
+     * @param id Contact row ID.
+     * @return Contact photo or default bitmap.
+     */
+    Bitmap importPhotoById(int id) {
+        return mApi.queryPhotoById(id);
+    }
+
+    /**
+     * Class to store primary data for a single contact and provides methods to lookup secondary
+     * data including phone numbers, email address, and given/family names.
+     */
     public class Contact {
-        private String mId;
+        private int mId;
         private String mDisplayName;
 
-        public Contact(String id, String displayName) {
+        public Contact(int id, String displayName) {
             mId = id;
             mDisplayName = displayName;
+        }
+
+        public int getId() {
+            return mId;
         }
 
         public String getDisplayName() {
             return mDisplayName;
         }
 
-        public List<String> getPhoneNumbers() {
+        public HashSet<String> getPhoneNumbers() {
             return mPhoneMap.get(mId);
         }
 
-        public List<String> getEmailAddresses() {
+        public HashSet<String> getEmailAddresses() {
             return mEmailMap.get(mId);
         }
 
         public StructuredName getStructuredName() {
             return mNameMap.get(mId);
+        }
+
+        public Bitmap getPhotoBitmap() {
+            return importPhotoById(mId);
         }
 
         @Override
@@ -174,6 +227,9 @@ public class ContactList extends ArrayList<ContactList.Contact> {
         }
     }
 
+    /**
+     * Simple data class used to store given and family name for a single contact.
+     */
     public static class StructuredName {
         public String givenName = "";
         public String familyName = "";

@@ -10,7 +10,7 @@
         android:id="@+id/photo"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:src="@drawable/default_60" />
+        android:src="@drawable/ic_contact_picture" />
 
     <TextView
         android:id="@+id/name"

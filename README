@@ -1,0 +1,7 @@
+Android Contact API utility that fetches contact data from the device on both pre-Eclair and post-Eclair OS versions.
+
+Uses generic Contact API that creates OS specific implementation at runtime based on device SDK level.
+
+Based on Contact API tutorial found here http://developer.android.com/resources/articles/contacts.html
+
+Includes test project with unit and functional tests.

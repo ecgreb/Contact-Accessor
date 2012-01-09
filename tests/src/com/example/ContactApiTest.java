@@ -7,15 +7,16 @@ import junit.framework.TestCase;
 /**
  * Test class for {@link ContactApi}.
  *
- * @author cgreb
- * @since 2011-07-12
+ * @author Chuck Greb <charles.greb@gmail.com>
  */
 public class ContactApiTest extends TestCase {
 
     protected ContactApi mContactApi;
 
     public void setUp() {
-        mContactApi = ContactApi.getInstance();
+        mContactApi = ContactApi.instance;
+        mContactApi.initContext(null);
+        mContactApi.initContentResolver(null);
     }
 
     public void testContactApiNotNull() {

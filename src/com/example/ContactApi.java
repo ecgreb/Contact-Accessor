@@ -1,93 +1,74 @@
-/*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.example;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.os.Build;
 
 /**
  * Abstract class that defines SDK-independent API for communication with the Contacts Provider.
  *
- * @author cgreb
- * @since 2011-07-12
+ * @author Chuck Greb <charles.greb@gmail.com>
  */
 public abstract class ContactApi {
 
     /** Static singleton instance holding the SDK-specific implementation of the class. */
-    private static ContactApi sInstance;
+    public static final ContactApi instance;
+
+    static {
+        int sdkVersion = Integer.parseInt(Build.VERSION.SDK);
+
+        if (sdkVersion < Build.VERSION_CODES.ECLAIR) {
+            instance = new ContactApiSdk3();
+        } else {
+            instance = new ContactApiSdk5();
+        }
+    }
+
+    /** Calling application's context */
+    protected Context mContext;
 
     /** Content resolver instance that will be used to execute a query. */
     protected ContentResolver mResolver;
 
     /**
-     * Singleton accessor which returns existing {@link #sInstance} or creates new instance based
-     * on current SDK.
+     * Initialize reference to {@link android.content.Context} calling application. Required for
+     * {@link ContactApiSdk3#queryPhotoById(long)}.
      *
-     * @return Instance of SDK-specific subclass.
-     * @see <a href="http://developer.android.com/resources/articles/contacts.html">Using the Contacts API</a>
+     * @param context Context of calling application.
      */
-    public static ContactApi getInstance() {
-        if (sInstance == null) {
-            @SuppressWarnings("deprecation")
-            int sdkVersion = Integer.parseInt(Build.VERSION.SDK);
-
-            String className;
-            if (sdkVersion < Build.VERSION_CODES.ECLAIR) {
-                className = "com.example.ContactApiSdk3";
-            } else {
-                className = "com.example.ContactApiSdk5";
-            }
-
-            try {
-                Class<? extends ContactApi> subclass =
-                        Class.forName(className).asSubclass(ContactApi.class);
-                sInstance = subclass.newInstance();
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
-
-        return sInstance;
+    public void initContext(Context context) {
+        mContext = context;
     }
 
     /**
-     * Initialize the {@link ContentResolver} used to execute queries. The resolver instance  must
-     * be initialized before calling {@link #queryContacts()}, {@link #queryPhoneNumbers()},
-     * or {@link #queryEmailAddresses()}.
+     * Initialize the {@link android.content.ContentResolver} used to execute queries. The resolver
+     * instance must be initialized before calling {@link #queryContacts()},
+     * {@link #queryPhoneNumbers()}, {@link #queryEmailAddresses()},
+     * or {@link #queryStructuredNames()}.
      *
-     * @param contentResolver Reference to the parent application's {@link ContentResolver} obtained
-     * by calling {@link android.app.Activity#getContentResolver()}
+     * @param contentResolver Reference to the parent application's {@link android.content.ContentResolver}
+     * obtained by calling {@link android.app.Activity#getContentResolver()}.
      */
     public void initContentResolver(ContentResolver contentResolver) {
         mResolver = contentResolver;
     }
 
     /**
-     * Get the database _ID column.
+     * Get the database row ID.
      *
      * @return Cursor column name used to retrieve the row ID for the contact.
+     * @see {@link android.provider.BaseColumns#_ID}
      */
     public abstract String getColumnId();
 
     /**
-     * Get the database display contact ID column.
+     * Get the database contact ID column.
      *
-     * @return Cursor column name used to retrieve contact ID.
+     * @return Cursor column name used to retrieve the row ID for the contact.
+     * @see {@link android.provider.Contacts.ContactMethods#PERSON_ID}
+     * @see {@link android.provider.ContactsContract.RawContactsColumns#CONTACT_ID}
      */
     public abstract String getColumnContactId();
 
@@ -101,14 +82,14 @@ public abstract class ContactApi {
     /**
      * Get the database phone number column.
      *
-     * @return Cursor column name used to retrieve the phone number(s).
+     * @return Cursor column name used to retrieve phone numbers.
      */
     public abstract String getColumnPhoneNumber();
 
     /**
      * Get the database email address column.
      *
-     * @return Cursor column name used to retrieve the email address(es).
+     * @return Cursor column name used to retrieve email addresses.
      */
     public abstract String getColumnEmailAddress();
 
@@ -149,9 +130,20 @@ public abstract class ContactApi {
 
     /**
      * Query structured name for all contacts.
+     * <p />
+     * Note: Structured names are only supported in SDK 5+. Implementations for SDK < 5 should
+     * always return null.
      *
      * @return Cursor used to iterate over structured name fields.
      */
     public abstract Cursor queryStructuredNames();
+
+    /**
+     * Query photo bitmap database for a single contact.
+     *
+     * @param id Contact row ID.
+     * @return Bitmap of contact photo or default bitmap if none was found.
+     */
+    public abstract Bitmap queryPhotoById(long id);
 
 }

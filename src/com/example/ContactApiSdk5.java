@@ -1,9 +1,19 @@
 package com.example;
 
+import android.content.ContentUris;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.ContactsContract;
 
+import java.io.InputStream;
+
+/**
+ * Contact API implementation for SDK 5+.
+ *
+ * @author Chuck Greb <charles.greb@gmail.com>
+ */
 public class ContactApiSdk5 extends ContactApi {
 
     @Override
@@ -103,6 +113,16 @@ public class ContactApiSdk5 extends ContactApi {
         final String selection = ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE;
 
         return mResolver.query(uri, projection, query, new String[] { selection }, null);
+    }
+
+    @Override
+    public Bitmap queryPhotoById(long id) {
+        Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id);
+        InputStream is = ContactsContract.Contacts.openContactPhotoInputStream(mResolver, uri);
+        if (is == null) {
+            return null;
+        }
+        return BitmapFactory.decodeStream(is);
     }
 
 }

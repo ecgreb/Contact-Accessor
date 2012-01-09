@@ -33,7 +33,7 @@ import java.util.Map;
  * </P>
  * <P>
  * All methods including ones related to querying the state of the cursor are
- * are non-functional and throw {@link java.lang.UnsupportedOperationException}.
+ * are non-functional and throw {@link UnsupportedOperationException}.
  * </P>
  */
 public class MockCursor implements Cursor {

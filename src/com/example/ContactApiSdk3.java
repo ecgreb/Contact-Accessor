@@ -1,9 +1,16 @@
 package com.example;
 
+import android.content.ContentUris;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.Contacts;
 
+/**
+ * Contact API implementation for SDK 3-4.
+ *
+ * @author Chuck Greb <charles.greb@gmail.com>
+ */
 @SuppressWarnings("deprecation")
 public class ContactApiSdk3 extends ContactApi {
 
@@ -91,7 +98,13 @@ public class ContactApiSdk3 extends ContactApi {
             throw new IllegalStateException("Content resolver has not been initialized");
         }
 
+        // Structured name not supported in SDK < 5
         return null;
     }
 
+    @Override
+    public Bitmap queryPhotoById(long id) {
+        Uri uri = ContentUris.withAppendedId(Contacts.People.CONTENT_URI, id);
+        return Contacts.People.loadContactPhoto(mContext, uri, R.drawable.icon, null);
+    }
 }

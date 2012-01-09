@@ -1,16 +1,15 @@
 package com.example;
 
 import android.database.Cursor;
+import android.graphics.Bitmap;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
- * Mock API object used for simulating the Android Contacts API. Can only be used on API Level 8 and
- * above due to use of the {@link MockCursor} class.
+ * Mock Contact API object used for testing {@link ContactList}. Uses local implementation of
+ * @link MockCursor} since {@link android.test.mock.MockCursor} is only available in SDK 8+.
  *
- * @author cgreb
- * @since 2011-07-15 16:53 ET
+ * @author Chuck Greb <charles.greb@gmail.com>
  */
 public class MockContactApi extends ContactApi {
 
@@ -98,7 +97,12 @@ public class MockContactApi extends ContactApi {
         return mNameCursor;
     }
 
-    public void addMockContact(String id, String name, String[] phoneArray, String[] emailArray) {
+    @Override
+    public Bitmap queryPhotoById(long id) {
+        return null;
+    }
+
+    public void addMockContact(int id, String name, String[] phoneArray, String[] emailArray) {
         mContactCursor.addValues(id, name);
 
         for (String phone : phoneArray) {
@@ -112,13 +116,13 @@ public class MockContactApi extends ContactApi {
         mNameCursor.addValues(id, "FirstName", "LastName");
     }
 
-    public class MockContactCursor extends MockCursor {
+    static class MockContactCursor extends MockCursor {
 
         private int mPosition = -1;
-        private ArrayList<String> mIdArray = new ArrayList<String>();
+        private ArrayList<Integer> mIdArray = new ArrayList<Integer>();
         private ArrayList<String> mDisplayNameArray = new ArrayList<String>();
 
-        public void addValues(String id, String displayName) {
+        public void addValues(int id, String displayName) {
             mIdArray.add(id);
             mDisplayNameArray.add(displayName);
         }
@@ -152,13 +156,20 @@ public class MockContactApi extends ContactApi {
 
         @Override
         public String getString(int index) {
-            if (index == 0) {
-                return mIdArray.get(mPosition);
-            } else if (index == 1) {
+            if (index == 1) {
                 return mDisplayNameArray.get(mPosition);
             }
 
             return null;
+        }
+
+        @Override
+        public int getInt(int index) {
+            if (index == 0) {
+                return mIdArray.get(mPosition);
+            }
+
+            return -1;
         }
 
         @Override
@@ -167,13 +178,13 @@ public class MockContactApi extends ContactApi {
         }
     }
 
-    public class MockPhoneCursor extends MockCursor {
+    static class MockPhoneCursor extends MockCursor {
 
         private int mPosition = -1;
-        private ArrayList<String> mContactIdArray = new ArrayList<String>();
+        private ArrayList<Integer> mContactIdArray = new ArrayList<Integer>();
         private ArrayList<String> mPhoneNumberArray = new ArrayList<String>();
 
-        public void addValues(String contactId, String phoneNumber) {
+        public void addValues(int contactId, String phoneNumber) {
             mContactIdArray.add(contactId);
             mPhoneNumberArray.add(phoneNumber);
         }
@@ -208,13 +219,20 @@ public class MockContactApi extends ContactApi {
 
         @Override
         public String getString(int index) {
-            if (index == 0) {
-                return mContactIdArray.get(mPosition);
-            } else if (index == 1) {
+            if (index == 1) {
                 return mPhoneNumberArray.get(mPosition);
             }
 
             return null;
+        }
+
+        @Override
+        public int getInt(int index) {
+            if (index == 0) {
+                return mContactIdArray.get(mPosition);
+            }
+
+            return -1;
         }
 
         @Override
@@ -223,13 +241,13 @@ public class MockContactApi extends ContactApi {
         }
     }
 
-    public class MockEmailCursor extends MockCursor {
+    static class MockEmailCursor extends MockCursor {
 
         private int mPosition = -1;
-        private ArrayList<String> mContactIdArray = new ArrayList<String>();
+        private ArrayList<Integer> mContactIdArray = new ArrayList<Integer>();
         private ArrayList<String> mEmailAddressesArray = new ArrayList<String>();
 
-        public void addValues(String contactId, String emailAddress) {
+        public void addValues(int contactId, String emailAddress) {
             mContactIdArray.add(contactId);
             mEmailAddressesArray.add(emailAddress);
         }
@@ -263,13 +281,20 @@ public class MockContactApi extends ContactApi {
 
         @Override
         public String getString(int index) {
-            if (index == 0) {
-                return mContactIdArray.get(mPosition);
-            } else if (index == 1) {
+            if (index == 1) {
                 return mEmailAddressesArray.get(mPosition);
             }
 
             return null;
+        }
+
+        @Override
+        public int getInt(int index) {
+            if (index == 0) {
+                return mContactIdArray.get(mPosition);
+            }
+
+            return -1;
         }
 
         @Override
@@ -278,14 +303,14 @@ public class MockContactApi extends ContactApi {
         }
     }
 
-    public class MockNameCursor extends MockCursor {
+    static class MockNameCursor extends MockCursor {
 
         private int mPosition = -1;
-        private ArrayList<String> mContactIdArray = new ArrayList<String>();
+        private ArrayList<Integer> mContactIdArray = new ArrayList<Integer>();
         private ArrayList<String> mGivenNameArray = new ArrayList<String>();
         private ArrayList<String> mFamilyNameArray = new ArrayList<String>();
 
-        public void addValues(String contactId, String givenName, String familyName) {
+        public void addValues(int contactId, String givenName, String familyName) {
             mContactIdArray.add(contactId);
             mGivenNameArray.add(givenName);
             mFamilyNameArray.add(familyName);
@@ -322,15 +347,22 @@ public class MockContactApi extends ContactApi {
 
         @Override
         public String getString(int index) {
-            if (index == 0) {
-                return mContactIdArray.get(mPosition);
-            } else if (index == 1) {
+            if (index == 1) {
                 return mGivenNameArray.get(mPosition);
             } else if (index == 2) {
                 return mFamilyNameArray.get(mPosition);
             }
 
             return null;
+        }
+
+        @Override
+        public int getInt(int index) {
+            if (index == 0) {
+                return mContactIdArray.get(mPosition);
+            }
+
+            return -1;
         }
 
         @Override

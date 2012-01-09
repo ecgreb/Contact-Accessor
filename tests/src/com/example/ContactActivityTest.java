@@ -12,14 +12,14 @@ import android.test.ActivityInstrumentationTestCase2;
  * -e class com.example.MyActivityTest \
  * com.example.tests/android.test.InstrumentationTestRunner
  */
-public class MyActivityTest extends ActivityInstrumentationTestCase2<MyActivity> {
+public class ContactActivityTest extends ActivityInstrumentationTestCase2<ContactActivity> {
 
-    public MyActivityTest() {
-        super("com.example", MyActivity.class);
+    public ContactActivityTest() {
+        super("com.example", ContactActivity.class);
     }
 
     public void testMyActivityNotNull() {
-        MyActivity myActivity = getActivity();
+        ContactActivity myActivity = getActivity();
         assertNotNull(myActivity);
     }
 
